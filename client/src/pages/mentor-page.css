@@ -1,0 +1,194 @@
+/*
+ * Edemy AI Mentor page-only styling.
+ * Scoped under .mentor-page. Does not target .mentor-markdown,
+ * so AI response typography and code/table formatting remain unchanged.
+ */
+
+ .mentor-page {
+    min-height: 100vh;
+    padding: 32px 0 48px;
+    color: #172033;
+    background:
+      radial-gradient(ellipse at 12% 0%, rgba(139, 92, 246, .10), transparent 34rem),
+      radial-gradient(ellipse at 90% 12%, rgba(99, 102, 241, .07), transparent 30rem),
+      #f8fafc;
+  }
+  .mentor-page, .mentor-page * { box-sizing: border-box; }
+  .mentor-page .mentor-page-container { width: min(100% - 32px, 1120px); margin-inline: auto; }
+  
+  .mentor-page .mentor-page-heading {
+    position: relative; overflow: hidden; margin-bottom: 26px; padding: 28px 30px;
+    border: 1px solid #e9e4fb; border-radius: 24px;
+    background: linear-gradient(130deg, #fff 0%, #faf8ff 52%, #f0efff 100%);
+    box-shadow: 0 12px 36px rgba(55, 40, 100, .055);
+  }
+  .mentor-page .mentor-page-heading::after {
+    position: absolute; top: -88px; right: -54px; width: 230px; height: 230px;
+    border: 1px solid rgba(139, 92, 246, .13); border-radius: 50%;
+    content: ""; pointer-events: none;
+  }
+  .mentor-page .back-link {
+    display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px;
+    color: #6251a5; font-size: 13px; font-weight: 650; text-decoration: none;
+    transition: color 160ms ease, transform 160ms ease;
+  }
+  .mentor-page .back-link:hover { color: #4c1d95; transform: translateX(-2px); }
+  .mentor-page .mentor-heading-main { display: flex; align-items: flex-start; gap: 18px; position: relative; z-index: 1; }
+  .mentor-page .mentor-page-mark {
+    display: grid; width: 54px; height: 54px; flex: 0 0 54px; place-items: center;
+    border: 1px solid #e4dcff; border-radius: 17px; color: #6d4bd1;
+    background: linear-gradient(145deg, #f4efff, #e8e7ff);
+    box-shadow: 0 7px 18px rgba(109, 75, 209, .12);
+  }
+  .mentor-page .section-kicker { display: inline-block; color: #7564b5; font-size: 10px; font-weight: 800; letter-spacing: .16em; line-height: 1.5; }
+  .mentor-page .mentor-heading-main h1 { margin: 9px 0 10px; color: #19152b; font-size: clamp(28px, 4vw, 43px); font-weight: 800; letter-spacing: -.045em; line-height: 1.12; }
+  .mentor-page .highlight-text { color: #7652d6; }
+  .mentor-page .mentor-heading-main p { max-width: 610px; margin: 0; color: #6b6880; font-size: 15px; line-height: 1.7; }
+  .mentor-page .mentor-course-context {
+    position: relative; z-index: 1; display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+    width: fit-content; max-width: 100%; margin: 22px 0 0 72px; padding: 9px 13px;
+    border: 1px solid #e6e0fa; border-radius: 999px; color: #64558e;
+    background: rgba(255,255,255,.8); font-size: 12px;
+  }
+  .mentor-page .mentor-course-context strong { color: #3f326c; }
+  
+  .mentor-page .mentor-chat-shell {
+    overflow: hidden; border: 1px solid #e3e7ef; border-radius: 22px; background: #fff;
+    box-shadow: 0 18px 50px rgba(25,32,55,.08), 0 2px 8px rgba(25,32,55,.03);
+  }
+  .mentor-page .mentor-chat-top {
+    display: flex; min-height: 76px; align-items: center; gap: 12px; padding: 16px 22px;
+    border-bottom: 1px solid #edf0f5; background: rgba(255,255,255,.96);
+  }
+  .mentor-page .mentor-online-avatar {
+    position: relative; display: grid; width: 42px; height: 42px; flex: 0 0 42px;
+    place-items: center; border: 1px solid #e5dcff; border-radius: 14px;
+    color: #6d4bd1; background: #f4f0ff;
+  }
+  .mentor-page .mentor-online-avatar > span {
+    position: absolute; right: -2px; bottom: -2px; width: 11px; height: 11px;
+    border: 2px solid #fff; border-radius: 50%; background: #22c55e;
+  }
+  .mentor-page .mentor-chat-top > div:nth-child(2) { display: flex; min-width: 0; flex-direction: column; gap: 4px; }
+  .mentor-page .mentor-chat-top > div:nth-child(2) strong { color: #20243a; font-size: 14px; font-weight: 750; }
+  .mentor-page .mentor-chat-top > div:nth-child(2) small { display: inline-flex; align-items: center; gap: 6px; color: #81879a; font-size: 11px; }
+  .mentor-page .online-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .mentor-page .chat-top-spacer { flex: 1; }
+  .mentor-page .private-chip { display: inline-flex; align-items: center; border: 1px solid #e7e9f0; border-radius: 999px; padding: 7px 10px; color: #73798c; background: #fafbfe; font-size: 11px; font-weight: 650; white-space: nowrap; }
+  .mentor-page .mentor-chat-top .btn.mentor-new-chat,
+  .mentor-page .mentor-chat-top .btn.btn-small {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 34px;
+    border: 1px solid #e4e7ef; border-radius: 10px; padding: 7px 10px; color: #5e5874;
+    background: #fff; font-size: 12px; cursor: pointer;
+  }
+  .mentor-page .mentor-chat-top .btn.btn-small:hover { border-color: #cfc2ff; background: #f8f5ff; }
+  
+  .mentor-page .mentor-chat-body {
+    min-height: 420px;
+    background: radial-gradient(ellipse at 50% 0%, rgba(245,243,255,.62), transparent 60%), #fff;
+  }
+  .mentor-page .mentor-chat-body.has-messages { min-height: 420px; }
+  .mentor-page .mentor-welcome-state { width: min(100%, 790px); margin-inline: auto; padding: 42px 28px 46px; text-align: center; }
+  .mentor-page .mentor-welcome-art { position: relative; display: grid; width: 88px; height: 88px; margin: 0 auto 20px; place-items: center; }
+  .mentor-page .welcome-robot {
+    display: grid; width: 72px; height: 72px; place-items: center; border: 1px solid #e2d9ff;
+    border-radius: 25px; color: #7652d6; background: linear-gradient(145deg,#f5f0ff,#e9e7ff);
+    box-shadow: 0 12px 30px rgba(118,82,214,.15);
+  }
+  .mentor-page .welcome-sparkle { position: absolute; color: #9a7bea; font-size: 20px; }
+  .mentor-page .sparkle-left { top: 3px; left: -2px; }
+  .mentor-page .sparkle-right { right: -2px; bottom: 5px; }
+  .mentor-page .mentor-welcome-state > h2 { margin: 0 0 10px; color: #222039; font-size: clamp(22px,3vw,28px); font-weight: 800; letter-spacing: -.035em; }
+  .mentor-page .mentor-welcome-state > p { max-width: 540px; margin: 0 auto; color: #777b8d; font-size: 14px; line-height: 1.8; }
+  .mentor-page .suggestion-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 13px; margin-top: 30px; text-align: left; }
+  .mentor-page .suggestion-card {
+    display: flex; min-width: 0; min-height: 150px; flex-direction: column; align-items: flex-start; gap: 12px;
+    border: 1px solid #e8e9f1; border-radius: 16px; padding: 17px; color: #24243a; background: #fff;
+    box-shadow: 0 3px 10px rgba(35,35,70,.025); text-align: left; cursor: pointer;
+    transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+  }
+  .mentor-page .suggestion-card:hover { transform: translateY(-3px); border-color: #d5c8ff; box-shadow: 0 12px 24px rgba(91,65,160,.09); }
+  .mentor-page .suggestion-card:focus-visible,
+  .mentor-page .send-button:focus-visible,
+  .mentor-page .mentor-chat-top .btn:focus-visible { outline: 3px solid rgba(139,92,246,.45); outline-offset: 3px; }
+  .mentor-page .suggestion-icon { display: grid; width: 38px; height: 38px; flex: 0 0 38px; place-items: center; border-radius: 12px; color: #7350ce; background: #f1edff; }
+  .mentor-page .suggestion-icon.example { color: #376fc7; background: #edf5ff; }
+  .mentor-page .suggestion-icon.plan { color: #0f8b78; background: #e8faf5; }
+  .mentor-page .suggestion-card > strong { color: #27253b; font-size: 13px; font-weight: 750; line-height: 1.45; }
+  .mentor-page .suggestion-card > span:last-child { display: inline-flex; align-items: center; gap: 5px; margin-top: auto; color: #8272b9; font-size: 11px; font-weight: 650; }
+  
+  .mentor-page .chat-messages { width: min(100%,900px); margin-inline: auto; padding: 26px 28px 30px; }
+  .mentor-page .chat-message { display: flex; align-items: flex-start; gap: 12px; min-width: 0; margin: 0 0 25px; }
+  .mentor-page .chat-message:last-of-type { margin-bottom: 12px; }
+  .mentor-page .chat-message-avatar { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 1px solid #e7e1fb; border-radius: 12px; color: #7652d6; background: #f4f0ff; }
+  .mentor-page .chat-message-avatar.user { border-color: #dbeafe; color: #2563eb; background: #eff6ff; }
+  .mentor-page .chat-message-content { min-width: 0; flex: 1; padding-top: 1px; }
+  .mentor-page .chat-sender { display: block; margin-bottom: 7px; color: #4b5065; font-size: 12px; font-weight: 750; }
+  .mentor-page .mentor-user-message { display: inline-block; max-width: 100%; margin: 0; border: 1px solid #e5ddff; border-radius: 4px 15px 15px; padding: 11px 14px; color: #33275b; background: #f6f3ff; line-height: 1.7; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .mentor-page .chat-message.user { flex-direction: row-reverse; }
+  .mentor-page .chat-message.user .chat-message-content { display: flex; flex-direction: column; align-items: flex-end; }
+  .mentor-page .chat-message.user .chat-sender { align-self: flex-end; }
+  .mentor-page .chat-message.user .mentor-user-message { border-color: #ddd6fe; border-radius: 15px 4px 15px 15px; color: #fff; background: #6d5bd0; text-align: left; }
+  
+  .mentor-page .mentor-composer { display: flex; align-items: flex-end; gap: 12px; padding: 18px 22px 14px; border-top: 1px solid #edf0f5; background: #fff; }
+  .mentor-page .composer-input-wrap { min-width: 0; flex: 1; border: 1px solid #e1e5ee; border-radius: 15px; padding: 9px 12px 7px; background: #fafbfe; transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+  .mentor-page .composer-input-wrap:focus-within { border-color: #b6a3f8; background: #fff; box-shadow: 0 0 0 4px rgba(139,92,246,.09); }
+  .mentor-page .composer-input-wrap textarea { display: block; width: 100%; min-height: 42px; max-height: 180px; resize: vertical; border: 0; outline: 0; padding: 5px 3px; color: #25263a; background: transparent; font: inherit; font-size: 14px; line-height: 1.6; }
+  .mentor-page .composer-input-wrap textarea::placeholder { color: #9a9daf; }
+  .mentor-page .composer-input-wrap textarea:disabled { cursor: not-allowed; opacity: .65; }
+  .mentor-page .composer-meta { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 5px 3px 0; color: #969aab; font-size: 10px; }
+  .mentor-page .composer-meta span:first-child { display: inline-flex; align-items: center; gap: 5px; }
+  .mentor-page .send-button { display: grid; width: 48px; height: 48px; flex: 0 0 48px; place-items: center; border: 0; border-radius: 14px; color: #fff; background: linear-gradient(135deg,#8062e9,#6246ca); box-shadow: 0 7px 16px rgba(98,70,202,.22); cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease; }
+  .mentor-page .send-button:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(98,70,202,.28); }
+  .mentor-page .send-button:disabled { box-shadow: none; cursor: not-allowed; opacity: .45; }
+  .mentor-page .mentor-disclaimer { padding: 0 22px 17px; color: #9a9eae; background: #fff; font-size: 10px; line-height: 1.6; text-align: center; }
+  .mentor-page .typing-indicator { display: flex; align-items: center; gap: 5px; color: #81859a; font-size: 12px; }
+  .mentor-page .typing-indicator i { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: #9883df; animation: mentor-pulse 1s infinite ease-in-out; }
+  .mentor-page .typing-indicator i:nth-child(2) { animation-delay: .15s; }
+  .mentor-page .typing-indicator i:nth-child(3) { margin-right: 5px; animation-delay: .3s; }
+  @keyframes mentor-pulse { 0%,60%,100% { transform: translateY(0); opacity: .45; } 30% { transform: translateY(-4px); opacity: 1; } }
+  .mentor-page .spinning { animation: mentor-spin 1s linear infinite; }
+  @keyframes mentor-spin { to { transform: rotate(360deg); } }
+  .mentor-page .mentor-bottom-note { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px 12px; margin-top: 18px; color: #85899a; font-size: 12px; text-align: center; }
+  .mentor-page .mentor-bottom-note > span { display: inline-flex; align-items: center; gap: 6px; color: #7761bb; font-weight: 750; }
+  .mentor-page .mentor-bottom-note p { margin: 0; line-height: 1.6; }
+  
+  @media (max-width: 700px) {
+    .mentor-page { padding: 18px 0 32px; }
+    .mentor-page .mentor-page-container { width: min(100% - 20px,1120px); }
+    .mentor-page .mentor-page-heading { margin-bottom: 16px; padding: 21px 18px; border-radius: 19px; }
+    .mentor-page .back-link { margin-bottom: 20px; }
+    .mentor-page .mentor-heading-main { gap: 12px; }
+    .mentor-page .mentor-page-mark { width: 43px; height: 43px; flex-basis: 43px; border-radius: 13px; }
+    .mentor-page .section-kicker { font-size: 9px; letter-spacing: .1em; }
+    .mentor-page .mentor-heading-main h1 { font-size: clamp(25px,7vw,34px); }
+    .mentor-page .mentor-heading-main p { font-size: 13px; }
+    .mentor-page .mentor-course-context { margin-left: 0; border-radius: 12px; }
+    .mentor-page .mentor-chat-shell { border-radius: 18px; }
+    .mentor-page .mentor-chat-top { min-height: 68px; gap: 9px; padding: 12px; }
+    .mentor-page .mentor-online-avatar { width: 37px; height: 37px; flex-basis: 37px; border-radius: 12px; }
+    .mentor-page .private-chip { display: none; }
+    .mentor-page .mentor-chat-top .btn.btn-small { padding: 7px; font-size: 11px; }
+    .mentor-page .mentor-chat-body, .mentor-page .mentor-chat-body.has-messages { min-height: 360px; }
+    .mentor-page .mentor-welcome-state { padding: 30px 16px; }
+    .mentor-page .suggestion-grid { grid-template-columns: 1fr; gap: 9px; margin-top: 23px; }
+    .mentor-page .suggestion-card { display: grid; min-height: auto; grid-template-columns: 38px minmax(0,1fr) auto; align-items: center; gap: 11px; padding: 12px; }
+    .mentor-page .suggestion-card > strong { font-size: 12px; }
+    .mentor-page .suggestion-card > span:last-child { margin-top: 0; white-space: nowrap; }
+    .mentor-page .chat-messages { padding: 20px 13px; }
+    .mentor-page .chat-message { gap: 8px; margin-bottom: 21px; }
+    .mentor-page .chat-message-avatar { width: 30px; height: 30px; flex-basis: 30px; border-radius: 10px; }
+    .mentor-page .mentor-composer { gap: 8px; padding: 12px 10px 10px; }
+    .mentor-page .composer-input-wrap { padding: 7px 9px 5px; }
+    .mentor-page .composer-meta { font-size: 9px; }
+    .mentor-page .send-button { width: 43px; height: 43px; flex-basis: 43px; border-radius: 12px; }
+    .mentor-page .mentor-disclaimer { padding: 0 12px 13px; font-size: 9px; }
+    .mentor-page .mentor-bottom-note { padding: 0 8px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .mentor-page *, .mentor-page *::before, .mentor-page *::after {
+      animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important; transition-duration: .01ms !important;
+    }
+  }
+  
