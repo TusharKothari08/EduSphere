@@ -27,11 +27,23 @@ app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 const allowedOrigins = [
   process.env.CLIENT_URL,
   "http://localhost:5173",
+  "http://localhost:5174",
   "https://edu-sphere-rho-seven.vercel.app",
-].filter(Boolean);
+].filter(Boolean).flatMap((url) => url.split(',')).map((url) => url.trim().replace(/\/+$/, '')).filter(Boolean);
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    const normalized = origin.trim().replace(/\/+$/, '');
+    if (
+      allowedOrigins.includes(normalized) ||
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(normalized)
+    ) {
+      return callback(null, true);
+    }
+    return callback(null, false);
+  },
+  credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
@@ -103,7 +115,15 @@ app.use((error, req, res, next) => {
 
 const port = Number(process.env.PORT || 5000);
 connectDatabase().then(() => {
-  app.listen(port, () => console.log(`Edemy LMS API listening on http://localhost:${port}`));
+  const server = app.listen(port, () => console.log(`Edemy LMS API listening on http://localhost:${port}`));
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.error(`Error: Port ${port} is already in use. Please terminate the existing process or choose another port.`);
+    } else {
+      console.error('Server error:', err);
+    }
+    process.exit(1);
+  });
 }).catch((error) => {
   console.error('Unable to start Edemy LMS API:', error.message);
   process.exit(1);

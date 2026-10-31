@@ -1,16 +1,12 @@
-
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 function getBearerToken(req) {
   const header = req.headers.authorization || '';
-  return header.startsWith('Bearer ')
-    ? header.slice(7).trim()
-    : '';
+  return header.startsWith('Bearer ') ? header.slice(7).trim() : '';
 }
 
 function getClerkUserId(req) {
-  // Current Clerk middleware API.
   const auth = typeof req.auth === 'function' ? req.auth() : req.auth;
   return auth?.userId || null;
 }
@@ -24,7 +20,7 @@ function getEducatorIds() {
 
 async function requireAuth(req, res, next) {
   try {
-    // Clerk mode: never fall back to legacy JWT authentication.
+    // Clerk authentication
     if (process.env.CLERK_SECRET_KEY) {
       const clerkUserId = getClerkUserId(req);
 
@@ -41,16 +37,12 @@ async function requireAuth(req, res, next) {
         user = await User.create({
           clerkId: clerkUserId,
           name: 'Learner',
-          role: educatorIds.includes(clerkUserId)
-            ? 'educator'
-            : 'student',
+          role: educatorIds.includes(clerkUserId) ? 'educator' : 'student',
+          roleAssigned: educatorIds.includes(clerkUserId),
         });
-      } else if (
-        educatorIds.includes(clerkUserId) &&
-        user.role !== 'educator'
-      ) {
-        // Grant educator access only to IDs authorized on the server.
+      } else if (educatorIds.includes(clerkUserId) && user.role !== 'educator') {
         user.role = 'educator';
+        user.roleAssigned = true;
         await user.save();
       }
 
@@ -65,7 +57,7 @@ async function requireAuth(req, res, next) {
       return next();
     }
 
-    // Legacy JWT mode is used only when Clerk is not configured.
+    // Legacy JWT authentication (when Clerk is not configured)
     const token = getBearerToken(req);
 
     if (!token || !process.env.JWT_SECRET) {
@@ -75,13 +67,11 @@ async function requireAuth(req, res, next) {
     }
 
     let payload;
-
     try {
       payload = jwt.verify(token, process.env.JWT_SECRET);
     } catch {
       return res.status(401).json({
-        message:
-          'Your session is invalid or expired. Please sign in again.',
+        message: 'Your session is invalid or expired. Please sign in again.',
       });
     }
 
@@ -109,7 +99,6 @@ async function requireAuth(req, res, next) {
 
 function optionalAuth(req, res, next) {
   let hasClerkIdentity = false;
-
   try {
     hasClerkIdentity = Boolean(getClerkUserId(req));
   } catch {

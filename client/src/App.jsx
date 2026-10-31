@@ -27,7 +27,29 @@ function SiteLayout({ children }) {
 }
 
 function NotFound() {
-  return <main className="container page-shell"><div className="empty-state not-found"><span className="section-kicker">404 · PAGE NOT FOUND</span><h1>Looks like this page took a different path.</h1><p>The link may be out of date, or the page may have moved.</p><a className="btn btn-primary" href="/">Back to Edemy</a></div></main>;
+  return (
+    <main className="min-h-[70vh] flex items-center justify-center px-4 py-16 bg-slate-50/70">
+      <div className="max-w-md w-full text-center bg-white border border-slate-200/80 rounded-3xl p-8 sm:p-10 shadow-sm space-y-4">
+        <span className="inline-block px-3 py-1 rounded-full bg-violet-50 text-violet-700 font-bold text-xs tracking-wider uppercase border border-violet-200/60">
+          404 · Page Not Found
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-['Manrope']">
+          Looks like this page took a different path.
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+          The link may be out of date or the course module has moved to another track.
+        </p>
+        <div className="pt-2">
+          <a
+            href="/"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition"
+          >
+            Back to EDUNEXA Home
+          </a>
+        </div>
+      </div>
+    </main>
+  );
 }
 
 function RoutedApp() {
@@ -42,15 +64,19 @@ function RoutedApp() {
       <Route path="/learn/:id" element={<ProtectedRoute><CoursePlayer /></ProtectedRoute>} />
       <Route path="/login" element={<AuthPage mode="login" />} />
       <Route path="/signup" element={<AuthPage mode="signup" />} />
-      <Route path="/payment/success" element={<ProtectedRoute><PaymentSuccess /></ProtectedRoute>} />
+      <Route path="/payment/success" element={<PaymentSuccess />} />
     </Routes> : <SiteLayout><Routes>
       <Route path="/" element={<Home />} />
       <Route path="/courses" element={<Courses />} />
       <Route path="/courses/:id" element={<CourseDetails />} />
       <Route path="/ai-mentor" element={<AIMentor />} />
-      <Route element={<ProtectedRoute />}><Route path="/dashboard" element={<Dashboard />} /></Route>
-      <Route element={<ProtectedRoute role="admin" />}><Route path="/admin" element={<AdminDashboard />} /></Route>
-      <Route element={<ProtectedRoute role="educator" />}>
+      <Route element={<ProtectedRoute role="student" />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Route>
+      <Route element={<ProtectedRoute role="admin" />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Route>
+      <Route element={<ProtectedRoute allowedRoles={['educator', 'admin']} />}>
         <Route path="/educator" element={<EducatorDashboard />} />
         <Route path="/educator/new-course" element={<CourseEditor />} />
         <Route path="/educator/courses/:id/edit" element={<CourseEditor />} />

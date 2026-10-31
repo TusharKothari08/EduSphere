@@ -1,5 +1,6 @@
 
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 :root {
   font-family: 'DM Sans', sans-serif;
   color: #20252f;
@@ -975,8 +976,6 @@ h2 { letter-spacing: -.04em; }
 :root[data-theme="dark"] .hero-section, :root[data-theme="dark"] .detail-hero, :root[data-theme="dark"] .auth-form-card, :root[data-theme="dark"] .learning-panel { background:var(--surface); color:var(--ink); }
 :root[data-theme="dark"] .hero-copy h1, :root[data-theme="dark"] .panel-topline h3, :root[data-theme="dark"] .admin-page h1, :root[data-theme="dark"] .admin-panel h2 { color:var(--ink); }
 :root[data-theme="dark"] .enrolled-course, :root[data-theme="dark"] .stat-card, :root[data-theme="dark"] .editor-card, :root[data-theme="dark"] .purchase-card, :root[data-theme="dark"] .syllabus-section, :root[data-theme="dark"] .admin-table-wrap, :root[data-theme="dark"] .learning-tool-card { background:var(--surface); border-color:var(--line); color:var(--ink); }
-:root[data-theme="dark"] input, :root[data-theme="dark"] textarea, :root[data-theme="dark"] select { background:var(--control); color:var(--ink); border-color:var(--line); }
-:root[data-theme="dark"] p, :root[data-theme="dark"] small, :root[data-theme="dark"] .nav-link, :root[data-theme="dark"] .user-name { color:var(--muted); }
 .theme-toggle { display:grid; place-items:center; width:36px; height:36px; border:1px solid var(--line); border-radius:11px; background:var(--surface); color:var(--ink); transition:transform var(--motion), border-color var(--motion); }
 .theme-toggle:hover { transform:translateY(-1px); border-color:var(--purple); }
 button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline:3px solid color-mix(in srgb, var(--focus), transparent 30%); outline-offset:2px; }
@@ -1106,14 +1105,18 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
 
 .auth-form-card.clerk-mode .clerk-auth-widget {
   width: 100%;
+  max-width: 440px;
   min-height: 0;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
 }
 
 .auth-form-card.clerk-mode .clerk-auth-widget > * {
   width: 100%;
-  max-width: 100%;
+  max-width: 440px;
 }
 
 @media (max-width: 600px) {
@@ -1126,5 +1129,66 @@ button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visib
   .auth-form-card.clerk-mode {
     max-width: 100%;
     padding: 0;
+  }
+}
+
+/* Student / Educator role selection on signup */
+.role-selection {
+  width: 100%;
+  margin: 0 0 22px;
+}
+
+.role-selection-description {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.role-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.role-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  transition: border-color 180ms ease, background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.role-option:hover {
+  border-color: var(--purple);
+}
+
+.role-option.active {
+  border-color: var(--purple);
+  background: var(--purple-light);
+  box-shadow: 0 0 0 2px rgba(107, 85, 232, 0.10);
+}
+
+.role-option strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.role-option span {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+@media (max-width: 420px) {
+  .role-options {
+    grid-template-columns: 1fr;
   }
 }

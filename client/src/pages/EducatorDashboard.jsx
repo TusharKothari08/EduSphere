@@ -1,10 +1,22 @@
-
-
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ArrowRight, BarChart3, BookOpen, CircleDollarSign, Eye, EyeOff,
-  Plus, Users, GraduationCap, TrendingUp, Pencil, Trash2,
-  LayoutDashboard, ClipboardList, RefreshCw, CheckCircle2
+  ArrowRight,
+  BarChart3,
+  BookOpen,
+  CircleDollarSign,
+  Eye,
+  EyeOff,
+  Plus,
+  Users,
+  GraduationCap,
+  TrendingUp,
+  Pencil,
+  Trash2,
+  LayoutDashboard,
+  ClipboardList,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -25,17 +37,10 @@ const formatMoney = (amount, currency = 'usd') => {
 
 const tabs = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { id: 'courses', label: 'My courses', icon: BookOpen },
-  { id: 'students', label: 'Learners', icon: Users },
-  { id: 'assessments', label: 'Assessments', icon: ClipboardList },
+  { id: 'courses', label: 'My Courses', icon: BookOpen },
+  { id: 'students', label: 'Enrolled Learners', icon: Users },
+  { id: 'assessments', label: 'Assessments & Grading', icon: ClipboardList },
 ];
-
-const buttonPrimary =
-  'inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:cursor-not-allowed disabled:opacity-50';
-const buttonSecondary =
-  'inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50';
-const fieldClass =
-  'mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100';
 
 export default function EducatorDashboard() {
   const { user } = useSession();
@@ -82,7 +87,8 @@ export default function EducatorDashboard() {
   }, [refresh]);
 
   useEffect(() => {
-    if (courses.length && !assessmentCourse) setAssessmentCourse(courses[0]._id);
+    if (courses.length && !assessmentCourse)
+      setAssessmentCourse(courses[0]._id);
     if (!courses.length) setAssessmentCourse('');
   }, [courses, assessmentCourse]);
 
@@ -94,8 +100,12 @@ export default function EducatorDashboard() {
   const togglePublished = async (course) => {
     setBusyId(course._id);
     try {
-      await api.put(`/courses/${course._id}`, { published: !course.published });
-      toast.success(course.published ? 'Course unpublished.' : 'Course published.');
+      await api.put(`/courses/${course._id}`, {
+        published: !course.published,
+      });
+      toast.success(
+        course.published ? 'Course unpublished.' : 'Course published to catalog.'
+      );
       setRefresh((n) => n + 1);
     } catch (error) {
       toast.error(getErrorMessage(error));
@@ -105,7 +115,12 @@ export default function EducatorDashboard() {
   };
 
   const deleteCourse = async (course) => {
-    if (!window.confirm(`Delete “${course.title}”? Courses with learners must be unpublished instead.`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete “${course.title}”? Courses with enrolled learners must be unpublished instead.`
+      )
+    )
+      return;
     setBusyId(course._id);
     try {
       await api.delete(`/courses/${course._id}`);
@@ -120,9 +135,13 @@ export default function EducatorDashboard() {
 
   const createQuiz = async (event) => {
     event.preventDefault();
-    const options = quizOptions.split('\n').map((value) => value.trim()).filter(Boolean);
+    const options = quizOptions
+      .split('\n')
+      .map((value) => value.trim())
+      .filter(Boolean);
     if (!assessmentCourse) return toast.error('Choose a course first.');
-    if (options.length < 2) return toast.error('Add at least two answer options.');
+    if (options.length < 2)
+      return toast.error('Add at least two answer options.');
     const correctIndex = Number(quizCorrect);
     if (correctIndex < 0 || correctIndex >= options.length) {
       return toast.error('Choose a valid correct option.');
@@ -190,279 +209,908 @@ export default function EducatorDashboard() {
     if (nextView === 'assessments') loadSubmissions();
   };
 
+  const isEducator = user?.role === 'educator' || user?.role === 'admin';
+
+  if (!isEducator) {
+    return (
+      <main className="min-h-[70vh] flex items-center justify-center p-6 bg-slate-50 dark:bg-slate-950">
+        <div className="max-w-md w-full text-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 shadow-sm">
+          <span className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle size={24} />
+          </span>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+            Educator Studio Access
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
+            This area is reserved for Course Instructors & Educators. You are currently signed in as a{' '}
+            <strong className="text-slate-700 dark:text-slate-200 capitalize">{user?.role || 'Student'}</strong>.
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <Link
+              to="/dashboard"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-violet-700"
+            >
+              Go to My Learning (Student Dashboard)
+            </Link>
+            <Link
+              to="/courses"
+              className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-2.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Browse Courses
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   const statCards = [
     {
-      label: 'Total courses',
-      value: loading ? '—' : (stats.totalCourses ?? courses.length),
-      detail: `${stats.publishedCourses ?? publishedCount} published and live`,
+      label: 'Total Courses',
+      value: loading ? '—' : stats.totalCourses ?? courses.length,
+      detail: `${stats.publishedCourses ?? publishedCount} published · ${draftCount} in draft`,
       icon: BookOpen,
-      color: 'bg-violet-100 text-violet-700',
+      color: 'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
     },
     {
-      label: 'Total enrollments',
-      value: loading ? '—' : (stats.totalEnrollments ?? 0),
-      detail: 'Learners across your courses',
+      label: 'Enrolled Learners',
+      value: loading ? '—' : stats.totalEnrollments ?? 0,
+      detail: 'Students actively learning',
       icon: Users,
-      color: 'bg-emerald-100 text-emerald-700',
+      color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
     },
     {
-      label: 'Recorded revenue',
+      label: 'Recorded Revenue',
       value: loading ? '—' : formatMoney(stats.totalRevenue, stats.currency),
-      detail: 'Successful recorded payments',
+      detail: 'Gross student enrollments',
       icon: CircleDollarSign,
-      color: 'bg-orange-100 text-orange-700',
+      color: 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
     },
   ];
 
   return (
-    <main className="min-h-screen bg-slate-50">
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <header className="mb-8 flex flex-col justify-between gap-5 rounded-3xl bg-gradient-to-br from-violet-950 via-violet-800 to-indigo-700 p-6 text-white shadow-lg sm:p-8 lg:flex-row lg:items-center">
+    <main className="min-h-screen bg-slate-50/70 dark:bg-slate-950 py-8 px-4 sm:px-6 lg:px-8 transition-colors">
+      <div className="mx-auto w-full max-w-7xl space-y-6">
+        {/* Educator Studio Hero Header */}
+        <header className="flex flex-col justify-between gap-5 rounded-3xl bg-gradient-to-br from-violet-900 via-violet-800 to-indigo-800 p-6 sm:p-8 text-white shadow-md lg:flex-row lg:items-center">
           <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-violet-200">Educator studio</p>
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-              Teach what you <span className="text-violet-200">know.</span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-violet-100 backdrop-blur-md">
+                <GraduationCap size={13} />
+                Educator Studio
+              </span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight font-['Manrope']">
+              Teach what you know.
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-6 text-violet-100 sm:text-base">
-              Welcome back, {user?.name?.split(' ')[0] || 'educator'}. Create thoughtful learning experiences and see how students are doing.
+            <p className="mt-2 max-w-2xl text-xs sm:text-sm text-violet-100 leading-relaxed">
+              Welcome back, <strong className="text-white">{user?.name}</strong>. Create thoughtful learning experiences, organize curriculum, and monitor student progress.
             </p>
           </div>
-          <Link to="/educator/new-course" className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold !text-violet-800 shadow-sm transition hover:bg-violet-50">
-            <Plus size={18} />
-            <span className="!text-violet-800">Create a course</span>
-          </Link>
+
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            <Link
+              to="/educator/new-course"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 text-xs sm:text-sm font-bold text-violet-800 shadow-md transition hover:bg-violet-50 cursor-pointer"
+            >
+              <Plus size={16} />
+              <span>Create a New Course</span>
+            </Link>
+          </div>
         </header>
 
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {/* Stats Row */}
+        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {statCards.map(({ label, value, detail, icon: Icon, color }) => (
-            <article key={label} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article
+              key={label}
+              className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+            >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm font-medium text-slate-500">{label}</p>
-                  <p className="mt-2 text-3xl font-bold tracking-tight text-slate-900">{value}</p>
-                  <p className="mt-2 text-xs text-slate-500">{detail}</p>
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    {label}
+                  </p>
+                  <p className="mt-1.5 text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                    {value}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                    {detail}
+                  </p>
                 </div>
-                <span className={`flex h-11 w-11 items-center justify-center rounded-xl ${color}`}>
-                  <Icon size={21} />
+                <span
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl shrink-0 ${color}`}
+                >
+                  <Icon size={20} />
                 </span>
               </div>
             </article>
           ))}
         </section>
 
-        <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-4 pt-4 sm:px-6">
-            <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+        {/* Workspace Card & Tabs */}
+        <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs dark:border-slate-800 dark:bg-slate-900">
+          {/* Tabs Topbar */}
+          <div className="border-b border-slate-200/80 px-5 pt-4 sm:px-6 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-violet-600">Your teaching workspace</p>
-                <h2 className="mt-1 text-xl font-bold text-slate-900 sm:text-2xl">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
+                  Educator Workspace
+                </p>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-white">
                   {tabs.find((tab) => tab.id === view)?.label || 'Overview'}
                 </h2>
               </div>
-              <button type="button" className={buttonSecondary} onClick={() => setRefresh((n) => n + 1)}>
-                <RefreshCw size={15} /> Refresh data
+              <button
+                type="button"
+                onClick={() => setRefresh((n) => n + 1)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 cursor-pointer self-start sm:self-auto"
+              >
+                <RefreshCw size={13} className={loading ? 'animate-spin' : ''} />
+                <span>Refresh Data</span>
               </button>
             </div>
+
+            {/* Navigation Tabs */}
             <nav className="flex gap-1 overflow-x-auto" aria-label="Educator sections">
               {tabs.map(({ id, label, icon: Icon }) => (
                 <button
                   type="button"
                   key={id}
                   onClick={() => changeView(id)}
-                  className={`inline-flex shrink-0 items-center gap-2 border-b-2 px-3 py-3 text-sm font-semibold transition sm:px-4 ${
+                  className={`inline-flex shrink-0 items-center gap-2 border-b-2 px-3.5 py-3 text-xs sm:text-sm font-semibold transition cursor-pointer ${
                     view === id
-                      ? 'border-violet-600 text-violet-700'
-                      : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800'
+                      ? 'border-violet-600 text-violet-700 dark:border-violet-400 dark:text-violet-300'
+                      : 'border-transparent text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                   aria-current={view === id ? 'page' : undefined}
                 >
-                  <Icon size={16} /> {label}
+                  <Icon size={15} />
+                  <span>{label}</span>
                 </button>
               ))}
             </nav>
           </div>
 
-          <div className="p-4 sm:p-6">
+          {/* Content Area */}
+          <div className="p-5 sm:p-6">
             {loading ? (
-              <div className="space-y-4" aria-label="Loading educator data">
-                <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
-                <div className="h-24 animate-pulse rounded-xl bg-slate-100" />
+              <div className="space-y-3 py-6" aria-label="Loading educator data">
+                <div className="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
+                <div className="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-slate-800" />
               </div>
             ) : (
               <>
+                {/* View 1: Overview */}
                 {view === 'overview' && (
                   <div className="space-y-6">
-                    <div className="grid gap-4 lg:grid-cols-3">
-                      <button type="button" onClick={() => changeView('courses')} className="group rounded-2xl border border-slate-200 p-5 text-left transition hover:border-violet-300 hover:bg-violet-50/50">
-                        <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><BookOpen size={20} /></span>
-                        <span className="block font-bold text-slate-900">Manage courses</span>
-                        <span className="mt-1 block text-sm text-slate-500">{courses.length} total · {draftCount} draft{draftCount === 1 ? '' : 's'}</span>
-                        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-violet-700">Open courses <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span>
+                    {/* Action Cards */}
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <button
+                        type="button"
+                        onClick={() => changeView('courses')}
+                        className="rounded-2xl border border-slate-200/80 p-5 text-left transition hover:border-violet-300 hover:bg-violet-50/40 dark:border-slate-800 dark:hover:border-violet-800 dark:hover:bg-violet-950/20 cursor-pointer"
+                      >
+                        <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300">
+                          <BookOpen size={19} />
+                        </span>
+                        <strong className="block text-sm font-bold text-slate-900 dark:text-white">
+                          Manage Courses
+                        </strong>
+                        <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                          {courses.length} total courses · {draftCount} draft(s)
+                        </span>
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-violet-600 dark:text-violet-400">
+                          View courses <ArrowRight size={13} />
+                        </span>
                       </button>
-                      <button type="button" onClick={() => changeView('students')} className="group rounded-2xl border border-slate-200 p-5 text-left transition hover:border-emerald-300 hover:bg-emerald-50/50">
-                        <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><Users size={20} /></span>
-                        <span className="block font-bold text-slate-900">View learners</span>
-                        <span className="mt-1 block text-sm text-slate-500">{students.length} learner record{students.length === 1 ? '' : 's'} available</span>
-                        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-emerald-700">Open learners <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span>
+
+                      <button
+                        type="button"
+                        onClick={() => changeView('students')}
+                        className="rounded-2xl border border-slate-200/80 p-5 text-left transition hover:border-emerald-300 hover:bg-emerald-50/40 dark:border-slate-800 dark:hover:border-emerald-800 dark:hover:bg-emerald-950/20 cursor-pointer"
+                      >
+                        <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                          <Users size={19} />
+                        </span>
+                        <strong className="block text-sm font-bold text-slate-900 dark:text-white">
+                          Enrolled Learners
+                        </strong>
+                        <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                          {students.length} learner records recorded
+                        </span>
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                          Track learners <ArrowRight size={13} />
+                        </span>
                       </button>
-                      <button type="button" onClick={() => changeView('assessments')} className="group rounded-2xl border border-slate-200 p-5 text-left transition hover:border-orange-300 hover:bg-orange-50/50">
-                        <span className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-700"><ClipboardList size={20} /></span>
-                        <span className="block font-bold text-slate-900">Assessments</span>
-                        <span className="mt-1 block text-sm text-slate-500">Create quizzes and assignments</span>
-                        <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-orange-700">Open assessments <ArrowRight size={15} className="transition group-hover:translate-x-1" /></span>
+
+                      <button
+                        type="button"
+                        onClick={() => changeView('assessments')}
+                        className="rounded-2xl border border-slate-200/80 p-5 text-left transition hover:border-amber-300 hover:bg-amber-50/40 dark:border-slate-800 dark:hover:border-amber-800 dark:hover:bg-amber-950/20 cursor-pointer"
+                      >
+                        <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                          <ClipboardList size={19} />
+                        </span>
+                        <strong className="block text-sm font-bold text-slate-900 dark:text-white">
+                          Assessments & Quizzes
+                        </strong>
+                        <span className="mt-1 block text-xs text-slate-500 dark:text-slate-400">
+                          Create quizzes & grade assignments
+                        </span>
+                        <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400">
+                          Open assessments <ArrowRight size={13} />
+                        </span>
                       </button>
                     </div>
 
-                    <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(260px,1fr)]">
-                      <section className="rounded-2xl border border-slate-200">
-                        <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
+                    {/* Recent courses & checklist split */}
+                    <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr]">
+                      {/* Recent Courses Column */}
+                      <section className="rounded-2xl border border-slate-200/80 p-5 dark:border-slate-800">
+                        <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-3">
                           <div>
-                            <h3 className="font-bold text-slate-900">Your courses</h3>
-                            <p className="mt-1 text-sm text-slate-500">A quick look at your latest course activity.</p>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                              Your Recent Courses
+                            </h3>
+                            <p className="text-xs text-slate-500">
+                              Quick look at your teaching curriculum.
+                            </p>
                           </div>
-                          <button type="button" onClick={() => changeView('courses')} className="text-sm font-semibold text-violet-700 hover:text-violet-900">View all</button>
+                          <button
+                            type="button"
+                            onClick={() => changeView('courses')}
+                            className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline cursor-pointer"
+                          >
+                            View all
+                          </button>
                         </div>
-                        {recentCourses.length ? (
-                          <div className="divide-y divide-slate-100">
-                            {recentCourses.map((course) => (
-                              <div key={course._id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                                <div className="flex min-w-0 items-center gap-3">
-                                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><GraduationCap size={19} /></span>
-                                  <div className="min-w-0">
-                                    <p className="truncate font-semibold text-slate-900">{course.title}</p>
-                                    <p className="mt-1 text-xs text-slate-500">{course.category || 'General'} · {course.level || 'All levels'}</p>
+
+                        {recentCourses.length > 0 ? (
+                          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {recentCourses.map((c) => (
+                              <div
+                                key={c._id}
+                                className="py-3 flex items-center justify-between gap-3"
+                              >
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <span className="w-9 h-9 rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 flex items-center justify-center shrink-0">
+                                    <GraduationCap size={18} />
+                                  </span>
+                                  <div className="truncate">
+                                    <strong className="text-xs font-bold text-slate-900 dark:text-white block truncate">
+                                      {c.title}
+                                    </strong>
+                                    <small className="text-[11px] text-slate-400">
+                                      {c.category || 'Development'} · {c.level || 'All levels'}
+                                    </small>
                                   </div>
                                 </div>
-                                <span className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${course.published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>
-                                  <span className={`h-1.5 w-1.5 rounded-full ${course.published ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                                  {course.published ? 'Published' : 'Draft'}
+
+                                <span
+                                  className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 ${
+                                    c.published
+                                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                      : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                                  }`}
+                                >
+                                  {c.published ? 'Published' : 'Draft'}
                                 </span>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="px-5 py-10 text-center">
-                            <GraduationCap className="mx-auto text-slate-300" size={32} />
-                            <h4 className="mt-3 font-semibold text-slate-900">Your first course starts here</h4>
-                            <p className="mt-1 text-sm text-slate-500">Create a course and add lessons for learners.</p>
-                            <Link className={`${buttonPrimary} mt-4`} to="/educator/new-course"><Plus size={16} /> Create course</Link>
+                          <div className="py-8 text-center">
+                            <GraduationCap
+                              size={32}
+                              className="mx-auto text-slate-300 dark:text-slate-600"
+                            />
+                            <h4 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">
+                              No courses created yet
+                            </h4>
+                            <p className="mt-1 text-xs text-slate-500">
+                              Start by creating your first course and adding lessons.
+                            </p>
+                            <Link
+                              to="/educator/new-course"
+                              className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-violet-700"
+                            >
+                              <Plus size={14} /> Create Course
+                            </Link>
                           </div>
                         )}
                       </section>
 
-                      <section className="rounded-2xl border border-slate-200 p-5">
-                        <div className="flex items-center gap-3">
-                          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700"><CheckCircle2 size={20} /></span>
-                          <div><h3 className="font-bold text-slate-900">Teaching checklist</h3><p className="text-sm text-slate-500">A few steps to get started.</p></div>
+                      {/* Educator Checklist Column */}
+                      <section className="rounded-2xl border border-slate-200/80 p-5 dark:border-slate-800 space-y-4">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 flex items-center justify-center">
+                            <CheckCircle2 size={18} />
+                          </span>
+                          <div>
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                              Teaching Checklist
+                            </h3>
+                            <p className="text-[11px] text-slate-500">
+                              Key steps to complete your studio setup.
+                            </p>
+                          </div>
                         </div>
-                        <ul className="mt-5 space-y-4 text-sm">
-                          <li className="flex items-start gap-3"><span className={`mt-0.5 ${courses.length ? 'text-emerald-600' : 'text-slate-300'}`}><CheckCircle2 size={18} /></span><span><strong className="text-slate-800">Create a course</strong><span className="mt-0.5 block text-slate-500">{courses.length ? 'You have created a course.' : 'Add your first course to your studio.'}</span></span></li>
-                          <li className="flex items-start gap-3"><span className={`mt-0.5 ${publishedCount ? 'text-emerald-600' : 'text-slate-300'}`}><CheckCircle2 size={18} /></span><span><strong className="text-slate-800">Publish a course</strong><span className="mt-0.5 block text-slate-500">{publishedCount ? 'At least one course is live.' : 'Publish a course when it is ready.'}</span></span></li>
-                          <li className="flex items-start gap-3"><span className={`mt-0.5 ${students.length ? 'text-emerald-600' : 'text-slate-300'}`}><CheckCircle2 size={18} /></span><span><strong className="text-slate-800">Connect with learners</strong><span className="mt-0.5 block text-slate-500">{students.length ? 'Learner records are available.' : 'Learners appear after they enroll.'}</span></span></li>
+
+                        <ul className="space-y-3 text-xs">
+                          <li className="flex items-start gap-2.5">
+                            <CheckCircle2
+                              size={16}
+                              className={
+                                courses.length
+                                  ? 'text-emerald-500 mt-0.5'
+                                  : 'text-slate-300 mt-0.5'
+                              }
+                            />
+                            <div>
+                              <strong className="text-slate-800 dark:text-slate-200 block">
+                                Create your course outline
+                              </strong>
+                              <span className="text-slate-500 text-[11px]">
+                                {courses.length
+                                  ? 'You have course drafts created.'
+                                  : 'Draft your first curriculum module.'}
+                              </span>
+                            </div>
+                          </li>
+
+                          <li className="flex items-start gap-2.5">
+                            <CheckCircle2
+                              size={16}
+                              className={
+                                publishedCount
+                                  ? 'text-emerald-500 mt-0.5'
+                                  : 'text-slate-300 mt-0.5'
+                              }
+                            />
+                            <div>
+                              <strong className="text-slate-800 dark:text-slate-200 block">
+                                Publish to public catalog
+                              </strong>
+                              <span className="text-slate-500 text-[11px]">
+                                {publishedCount
+                                  ? `${publishedCount} course(s) are currently live.`
+                                  : 'Publish when lessons are ready for students.'}
+                              </span>
+                            </div>
+                          </li>
+
+                          <li className="flex items-start gap-2.5">
+                            <CheckCircle2
+                              size={16}
+                              className={
+                                students.length
+                                  ? 'text-emerald-500 mt-0.5'
+                                  : 'text-slate-300 mt-0.5'
+                              }
+                            />
+                            <div>
+                              <strong className="text-slate-800 dark:text-slate-200 block">
+                                Engage with enrolled learners
+                              </strong>
+                              <span className="text-slate-500 text-[11px]">
+                                {students.length
+                                  ? `${students.length} students enrolled.`
+                                  : 'Learners appear here as they enroll.'}
+                              </span>
+                            </div>
+                          </li>
                         </ul>
-                        <Link to="/educator/new-course" className={`${buttonPrimary} mt-6 w-full`}><Plus size={16} /> Create a course</Link>
+
+                        <Link
+                          to="/educator/new-course"
+                          className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-violet-700"
+                        >
+                          <Plus size={14} /> Add New Course
+                        </Link>
                       </section>
-                    </div>
-                    <div className="flex items-start gap-3 rounded-2xl border border-violet-100 bg-violet-50 p-4 text-violet-950">
-                      <TrendingUp size={21} className="mt-0.5 shrink-0 text-violet-700" />
-                      <div><p className="font-semibold">Teach, learn, improve.</p><p className="mt-1 text-sm leading-5 text-violet-800">Review learner progress regularly and use course feedback to improve your next lesson.</p></div>
-                      <BarChart3 size={36} className="ml-auto hidden shrink-0 text-violet-300 sm:block" />
                     </div>
                   </div>
                 )}
 
+                {/* View 2: My Courses Table */}
                 {view === 'courses' && (
-                  <div>
-                    <div className="mb-5 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                      <div><h3 className="font-bold text-slate-900">My courses</h3><p className="mt-1 text-sm text-slate-500">Edit course details, manage publishing, or preview your course.</p></div>
-                      <Link to="/educator/new-course" className={buttonPrimary}><Plus size={16} /> Create a course</Link>
+                  <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                          My Courses ({courses.length})
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Edit curriculum, update pricing, and toggle course visibility.
+                        </p>
+                      </div>
+                      <Link
+                        to="/educator/new-course"
+                        className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-violet-700 cursor-pointer shrink-0"
+                      >
+                        <Plus size={14} />
+                        <span>Create New Course</span>
+                      </Link>
                     </div>
-                    {courses.length ? (
-                      <div className="overflow-x-auto rounded-xl border border-slate-200">
-                        <table className="w-full min-w-[700px] text-left text-sm">
-                          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-4 py-3 font-semibold">Course</th><th className="px-4 py-3 font-semibold">Status</th><th className="px-4 py-3 font-semibold">Price</th><th className="px-4 py-3 font-semibold">Actions</th></tr></thead>
-                          <tbody className="divide-y divide-slate-100">
+
+                    {courses.length > 0 ? (
+                      <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-800">
+                        <table className="w-full min-w-[650px] text-xs text-left">
+                          <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200/80 dark:border-slate-800">
+                            <tr>
+                              <th className="px-4 py-3">Course</th>
+                              <th className="px-4 py-3">Status</th>
+                              <th className="px-4 py-3">Price</th>
+                              <th className="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {courses.map((course) => (
-                              <tr key={course._id} className="hover:bg-slate-50/70">
-                                <td className="px-4 py-4"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 text-violet-700"><GraduationCap size={18} /></span><div><p className="font-semibold text-slate-900">{course.title}</p><p className="mt-1 text-xs text-slate-500">{course.category || 'General'} · {course.level || 'All levels'}</p></div></div></td>
-                                <td className="px-4 py-4"><span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${course.published ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}><span className={`h-1.5 w-1.5 rounded-full ${course.published ? 'bg-emerald-500' : 'bg-amber-500'}`} />{course.published ? 'Published' : 'Draft'}</span></td>
-                                <td className="px-4 py-4 font-semibold text-slate-800">{course.price ? `$${Number(course.price).toFixed(0)}` : 'Free'}</td>
-                                <td className="px-4 py-4"><div className="flex items-center gap-2">
-                                  <Link className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100" to={`/educator/courses/${course._id}/edit`} title="Edit course"><Pencil size={15} /></Link>
-                                  <button type="button" className={buttonSecondary} onClick={() => togglePublished(course)} disabled={busyId === course._id} title={course.published ? 'Unpublish course' : 'Publish course'}>{course.published ? <EyeOff size={15} /> : <Eye size={15} />}{course.published ? 'Unpublish' : 'Publish'}</button>
-                                  <Link className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100" to={`/courses/${course._id}`} title="Preview course"><ArrowRight size={15} /></Link>
-                                  <button type="button" className="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50 disabled:opacity-50" onClick={() => deleteCourse(course)} disabled={busyId === course._id} title="Delete course"><Trash2 size={15} /></button>
-                                </div></td>
+                              <tr
+                                key={course._id}
+                                className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition"
+                              >
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center gap-3">
+                                    <span className="w-9 h-9 rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 flex items-center justify-center shrink-0">
+                                      <GraduationCap size={18} />
+                                    </span>
+                                    <div>
+                                      <strong className="text-xs font-bold text-slate-900 dark:text-white block">
+                                        {course.title}
+                                      </strong>
+                                      <small className="text-slate-400">
+                                        {course.category} · {course.level}
+                                      </small>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <span
+                                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                      course.published
+                                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                                        : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                                    }`}
+                                  >
+                                    {course.published ? 'Published' : 'Draft'}
+                                  </span>
+                                </td>
+
+                                <td className="px-4 py-3.5 font-bold text-slate-800 dark:text-slate-200">
+                                  {course.price === 0
+                                    ? 'Free'
+                                    : `$${Number(course.price).toFixed(0)}`}
+                                </td>
+
+                                <td className="px-4 py-3.5 text-right">
+                                  <div className="inline-flex items-center gap-1.5">
+                                    {/* Edit Button */}
+                                    <Link
+                                      to={`/educator/courses/${course._id}/edit`}
+                                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition"
+                                      title="Edit course"
+                                    >
+                                      <Pencil size={13} />
+                                    </Link>
+
+                                    {/* Publish Toggle Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => togglePublished(course)}
+                                      disabled={busyId === course._id}
+                                      className="px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-[11px] inline-flex items-center gap-1 transition cursor-pointer"
+                                      title={
+                                        course.published
+                                          ? 'Unpublish course'
+                                          : 'Publish course'
+                                      }
+                                    >
+                                      {course.published ? (
+                                        <>
+                                          <EyeOff size={13} className="text-amber-600" />
+                                          <span>Unpublish</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          <Eye size={13} className="text-emerald-600" />
+                                          <span>Publish</span>
+                                        </>
+                                      )}
+                                    </button>
+
+                                    {/* Preview Course Button */}
+                                    <Link
+                                      to={`/courses/${course._id}`}
+                                      className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition"
+                                      title="Preview course as student"
+                                    >
+                                      <ArrowRight size={13} />
+                                    </Link>
+
+                                    {/* Delete Course Button */}
+                                    <button
+                                      type="button"
+                                      onClick={() => deleteCourse(course)}
+                                      disabled={busyId === course._id}
+                                      className="p-1.5 rounded-lg border border-red-200 hover:bg-red-50 text-red-600 transition cursor-pointer"
+                                      title="Delete course"
+                                    >
+                                      <Trash2 size={13} />
+                                    </button>
+                                  </div>
+                                </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
                     ) : (
-                      <div className="rounded-2xl border border-dashed border-slate-300 px-5 py-12 text-center">
-                        <GraduationCap className="mx-auto text-slate-300" size={36} /><h3 className="mt-3 font-bold text-slate-900">Your first course is the start of something.</h3><p className="mt-2 text-sm text-slate-500">Create a course, add lessons, and publish it for learners to discover.</p><Link className={`${buttonPrimary} mt-5`} to="/educator/new-course"><Plus size={16} /> Create your first course</Link>
+                      <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-10 text-center">
+                        <GraduationCap
+                          size={36}
+                          className="mx-auto text-slate-300 dark:text-slate-600"
+                        />
+                        <h4 className="mt-3 text-sm font-bold text-slate-900 dark:text-white">
+                          You haven't created any courses yet
+                        </h4>
+                        <p className="mt-1 text-xs text-slate-500 max-w-sm mx-auto">
+                          Create your first course to start sharing knowledge with students.
+                        </p>
+                        <Link
+                          to="/educator/new-course"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-violet-700"
+                        >
+                          <Plus size={14} /> Create Your First Course
+                        </Link>
                       </div>
                     )}
                   </div>
                 )}
 
+                {/* View 3: Learners */}
                 {view === 'students' && (
-                  <div>
-                    <div className="mb-5"><h3 className="font-bold text-slate-900">Learners</h3><p className="mt-1 text-sm text-slate-500">Track learners enrolled in your courses.</p></div>
-                    {students.length ? (
-                      <div className="overflow-x-auto rounded-xl border border-slate-200">
-                        <table className="w-full min-w-[680px] text-left text-sm">
-                          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500"><tr><th className="px-4 py-3 font-semibold">Learner</th><th className="px-4 py-3 font-semibold">Course</th><th className="px-4 py-3 font-semibold">Progress</th><th className="px-4 py-3 font-semibold">Enrolled</th></tr></thead>
-                          <tbody className="divide-y divide-slate-100">
-                            {students.map((student, index) => (
-                              <tr key={student.id || `${student.name}-${index}`} className="hover:bg-slate-50/70">
-                                <td className="px-4 py-4"><div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-100 font-bold text-violet-700">{(student.name || 'L').slice(0, 1).toUpperCase()}</span><div><p className="font-semibold text-slate-900">{student.name || 'Learner'}</p><p className="text-xs text-slate-500">{student.email || 'Edemy learner'}</p></div></div></td>
-                                <td className="px-4 py-4 font-medium text-slate-800">{student.course || '—'}</td>
-                                <td className="px-4 py-4"><div className="flex items-center gap-3"><div className="h-2 w-24 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-violet-600" style={{ width: `${Math.max(0, Math.min(100, Number(student.progressPercent) || 0))}%` }} /></div><span className="text-xs text-slate-500">{Number(student.progressPercent) || 0}%</span></div></td>
-                                <td className="px-4 py-4 text-slate-600">{student.enrolledAt ? new Date(student.enrolledAt).toLocaleDateString() : '—'}</td>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                        Enrolled Learners ({students.length})
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Track students enrolled in your courses and their learning progress.
+                      </p>
+                    </div>
+
+                    {students.length > 0 ? (
+                      <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-slate-800">
+                        <table className="w-full min-w-[650px] text-xs text-left">
+                          <thead className="bg-slate-50 dark:bg-slate-850 text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider border-b border-slate-200/80 dark:border-slate-800">
+                            <tr>
+                              <th className="px-4 py-3">Learner</th>
+                              <th className="px-4 py-3">Enrolled Course</th>
+                              <th className="px-4 py-3">Progress</th>
+                              <th className="px-4 py-3">Enrolled Date</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                            {students.map((student, idx) => (
+                              <tr
+                                key={student.id || idx}
+                                className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40 transition"
+                              >
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center gap-2.5">
+                                    <span className="w-8 h-8 rounded-full bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300 font-bold flex items-center justify-center shrink-0">
+                                      {(student.name || 'L').slice(0, 1).toUpperCase()}
+                                    </span>
+                                    <div>
+                                      <strong className="text-xs font-bold text-slate-900 dark:text-white block">
+                                        {student.name || 'Learner'}
+                                      </strong>
+                                      <small className="text-slate-400">
+                                        {student.email || 'Student account'}
+                                      </small>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                <td className="px-4 py-3.5 font-medium text-slate-800 dark:text-slate-200">
+                                  {student.course || 'Course'}
+                                </td>
+
+                                <td className="px-4 py-3.5">
+                                  <div className="flex items-center gap-2">
+                                    <div className="w-20 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
+                                      <div
+                                        className="h-full bg-violet-600 rounded-full"
+                                        style={{
+                                          width: `${Math.max(
+                                            0,
+                                            Math.min(
+                                              100,
+                                              Number(student.progressPercent) || 0
+                                            )
+                                          )}%`,
+                                        }}
+                                      />
+                                    </div>
+                                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
+                                      {student.progressPercent || 0}%
+                                    </span>
+                                  </div>
+                                </td>
+
+                                <td className="px-4 py-3.5 text-slate-400">
+                                  {student.enrolledAt
+                                    ? new Date(student.enrolledAt).toLocaleDateString()
+                                    : '—'}
+                                </td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
-                    ) : <div className="rounded-2xl border border-dashed border-slate-300 px-5 py-12 text-center"><Users size={32} className="mx-auto text-slate-300" /><h3 className="mt-3 font-bold text-slate-900">Your learner list will appear here.</h3><p className="mt-2 text-sm text-slate-500">When students enroll in a published course, you can track their progress here.</p></div>}
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 p-10 text-center">
+                        <Users
+                          size={32}
+                          className="mx-auto text-slate-300 dark:text-slate-600"
+                        />
+                        <h4 className="mt-2 text-sm font-bold text-slate-900 dark:text-white">
+                          No student enrollments yet
+                        </h4>
+                        <p className="mt-1 text-xs text-slate-500">
+                          When students enroll in your published courses, their progress will appear here.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
+                {/* View 4: Assessments & Grading */}
                 {view === 'assessments' && (
-                  <div className="space-y-8">
-                    <div className="max-w-sm"><label className="block text-sm font-semibold text-slate-700">Course<select className={fieldClass} value={assessmentCourse} onChange={(event) => setAssessmentCourse(event.target.value)}><option value="">Select a course</option>{courses.map((course) => <option key={course._id} value={course._id}>{course.title}</option>)}</select></label></div>
-                    <div className="grid gap-5 lg:grid-cols-2">
-                      <form className="space-y-4 rounded-2xl border border-slate-200 p-5" onSubmit={createQuiz}>
-                        <div><p className="text-xs font-bold uppercase tracking-widest text-violet-600">Knowledge check</p><h3 className="mt-1 text-lg font-bold text-slate-900">Create a multiple-choice quiz</h3></div>
-                        <label className="block text-sm font-medium text-slate-700">Quiz title<input className={fieldClass} required value={quizTitle} onChange={(event) => setQuizTitle(event.target.value)} placeholder="e.g. React fundamentals" /></label>
-                        <label className="block text-sm font-medium text-slate-700">Question<input className={fieldClass} required value={quizPrompt} onChange={(event) => setQuizPrompt(event.target.value)} placeholder="What does useState return?" /></label>
-                        <label className="block text-sm font-medium text-slate-700">Answer options (one per line)<textarea className={fieldClass} required rows={4} value={quizOptions} onChange={(event) => setQuizOptions(event.target.value)} placeholder={'A state value\nA state value and setter\nA component'} /></label>
-                        <label className="block text-sm font-medium text-slate-700">Correct option<select className={fieldClass} value={quizCorrect} onChange={(event) => setQuizCorrect(event.target.value)}>{quizOptions.split('\n').map((value) => value.trim()).filter(Boolean).map((value, index) => <option value={index} key={`${index}-${value}`}>{index + 1}. {value}</option>)}</select></label>
-                        <button className={buttonPrimary} type="submit" disabled={!assessmentCourse}><Plus size={16} /> Publish quiz</button>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                        Course Assessments & Grading
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Create quizzes and assignments, and review student submissions.
+                      </p>
+                    </div>
+
+                    {/* Course Selection */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+                        Select Target Course:
+                      </label>
+                      <select
+                        value={assessmentCourse}
+                        onChange={(e) => setAssessmentCourse(e.target.value)}
+                        className="w-full sm:w-80 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-semibold text-slate-800 dark:text-slate-200"
+                      >
+                        {courses.map((c) => (
+                          <option key={c._id} value={c._id}>
+                            {c.title}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="grid gap-6 lg:grid-cols-2">
+                      {/* Form 1: Create Quiz */}
+                      <form
+                        onSubmit={createQuiz}
+                        className="rounded-2xl border border-slate-200/80 p-5 dark:border-slate-800 space-y-3.5 bg-slate-50/50 dark:bg-slate-850"
+                      >
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-violet-600">
+                            Multiple-Choice Assessment
+                          </span>
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                            Create a Quiz
+                          </h4>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Quiz Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={quizTitle}
+                            onChange={(e) => setQuizTitle(e.target.value)}
+                            placeholder="e.g. React Hooks Quiz"
+                            required
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Question Prompt *
+                          </label>
+                          <input
+                            type="text"
+                            value={quizPrompt}
+                            onChange={(e) => setQuizPrompt(e.target.value)}
+                            placeholder="e.g. What does useEffect return?"
+                            required
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Answer Options (one per line) *
+                          </label>
+                          <textarea
+                            rows={3}
+                            value={quizOptions}
+                            onChange={(e) => setQuizOptions(e.target.value)}
+                            placeholder={'Option A\nOption B\nOption C'}
+                            required
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Correct Answer:
+                          </label>
+                          <select
+                            value={quizCorrect}
+                            onChange={(e) => setQuizCorrect(e.target.value)}
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
+                          >
+                            {quizOptions
+                              .split('\n')
+                              .map((v) => v.trim())
+                              .filter(Boolean)
+                              .map((opt, i) => (
+                                <option key={i} value={i}>
+                                  Option {i + 1}: {opt}
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={!assessmentCourse}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
+                        >
+                          <Plus size={14} /> Publish Quiz
+                        </button>
                       </form>
-                      <form className="space-y-4 rounded-2xl border border-slate-200 p-5" onSubmit={createAssignment}>
-                        <div><p className="text-xs font-bold uppercase tracking-widest text-emerald-600">Applied learning</p><h3 className="mt-1 text-lg font-bold text-slate-900">Create an assignment</h3></div>
-                        <label className="block text-sm font-medium text-slate-700">Assignment title<input className={fieldClass} required value={assignmentTitle} onChange={(event) => setAssignmentTitle(event.target.value)} placeholder="e.g. Build a small component" /></label>
-                        <label className="block text-sm font-medium text-slate-700">Instructions<textarea className={fieldClass} required rows={7} value={assignmentInstructions} onChange={(event) => setAssignmentInstructions(event.target.value)} placeholder="Explain what students should submit and how it will be assessed." /></label>
-                        <button className={buttonPrimary} type="submit" disabled={!assessmentCourse}><Plus size={16} /> Publish assignment</button>
+
+                      {/* Form 2: Create Assignment */}
+                      <form
+                        onSubmit={createAssignment}
+                        className="rounded-2xl border border-slate-200/80 p-5 dark:border-slate-800 space-y-3.5 bg-slate-50/50 dark:bg-slate-850"
+                      >
+                        <div>
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">
+                            Hands-On Practice
+                          </span>
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-white mt-0.5">
+                            Create an Assignment
+                          </h4>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Assignment Title *
+                          </label>
+                          <input
+                            type="text"
+                            value={assignmentTitle}
+                            onChange={(e) => setAssignmentTitle(e.target.value)}
+                            placeholder="e.g. Build a Responsive Dashboard"
+                            required
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            Instructions & Evaluation Criteria *
+                          </label>
+                          <textarea
+                            rows={5}
+                            value={assignmentInstructions}
+                            onChange={(e) =>
+                              setAssignmentInstructions(e.target.value)
+                            }
+                            placeholder="Explain what learners should build or write, and how it will be graded…"
+                            required
+                            className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs"
+                          />
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={!assessmentCourse}
+                          className="inline-flex items-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2 text-xs font-bold text-white shadow-xs hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
+                        >
+                          <Plus size={14} /> Publish Assignment
+                        </button>
                       </form>
                     </div>
-                    <section>
-                      <div className="mb-4"><p className="text-xs font-bold uppercase tracking-widest text-slate-500">Learner work</p><h3 className="mt-1 text-lg font-bold text-slate-900">Submissions to grade</h3></div>
-                      {submissions.length ? (
+
+                    {/* Submissions Section */}
+                    <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                          Learner Submissions to Grade
+                        </h4>
+                        <p className="text-xs text-slate-500">
+                          Review assignment submissions from enrolled learners.
+                        </p>
+                      </div>
+
+                      {submissions.length > 0 ? (
                         <div className="space-y-3">
-                          {submissions.map((submission) => (
-                            <article key={submission._id} className="rounded-2xl border border-slate-200 p-4 sm:p-5">
-                              <div className="flex flex-col justify-between gap-4 lg:flex-row">
-                                <div className="min-w-0"><p className="font-semibold text-slate-900">{submission.assignment?.title || 'Assignment'} · {submission.user?.name || 'Learner'}</p><p className="mt-1 text-xs text-slate-500">{submission.course?.title || 'Course'} · submitted {submission.createdAt ? new Date(submission.createdAt).toLocaleDateString() : 'date unavailable'}</p><p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">{submission.body}</p></div>
-                                <div className="flex shrink-0 flex-col gap-2 lg:w-44"><label className="text-xs font-semibold text-slate-600">Grade<input className={fieldClass} type="number" min="0" max={submission.assignment?.maxPoints || 100} placeholder="Enter grade" value={gradeValues[submission._id] ?? submission.grade ?? ''} onChange={(event) => setGradeValues((old) => ({ ...old, [submission._id]: event.target.value }))} /></label><button type="button" className={buttonSecondary} onClick={() => gradeSubmission(submission)}>Save grade</button>{submission.grade !== null && submission.grade !== undefined && <span className="text-xs text-slate-500">Current grade: {submission.grade}</span>}</div>
+                          {submissions.map((sub) => (
+                            <div
+                              key={sub._id}
+                              className="p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4"
+                            >
+                              <div className="min-w-0">
+                                <strong className="text-xs font-bold text-slate-900 dark:text-white block">
+                                  {sub.assignment?.title || 'Assignment'} · {sub.user?.name || 'Student'}
+                                </strong>
+                                <small className="text-[11px] text-slate-400">
+                                  {sub.course?.title || 'Course'} · Submitted {new Date(sub.createdAt).toLocaleDateString()}
+                                </small>
+                                <p className="mt-2 text-xs text-slate-700 dark:text-slate-300 whitespace-pre-wrap leading-relaxed">
+                                  {sub.body}
+                                </p>
                               </div>
-                            </article>
+
+                              <div className="flex sm:flex-col gap-2 shrink-0 sm:w-40">
+                                <label className="text-[11px] font-semibold text-slate-500">
+                                  Grade:
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    max={sub.assignment?.maxPoints || 100}
+                                    placeholder="Grade"
+                                    value={
+                                      gradeValues[sub._id] ?? sub.grade ?? ''
+                                    }
+                                    onChange={(e) =>
+                                      setGradeValues((old) => ({
+                                        ...old,
+                                        [sub._id]: e.target.value,
+                                      }))
+                                    }
+                                    className="w-full px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700 text-xs mt-0.5"
+                                  />
+                                </label>
+                                <button
+                                  type="button"
+                                  onClick={() => gradeSubmission(sub)}
+                                  className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-700 text-white font-semibold text-xs transition cursor-pointer"
+                                >
+                                  Save Grade
+                                </button>
+                                {sub.grade !== null && sub.grade !== undefined && (
+                                  <span className="text-[10px] text-emerald-600 font-bold">
+                                    Current: {sub.grade}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           ))}
                         </div>
-                      ) : <p className="rounded-xl bg-slate-50 p-5 text-sm text-slate-500">No submissions yet. Learner submissions will appear here.</p>}
-                    </section>
+                      ) : (
+                        <p className="text-xs text-slate-400 italic">
+                          No student submissions awaiting review yet.
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
               </>

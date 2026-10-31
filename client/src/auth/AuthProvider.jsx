@@ -1,4 +1,3 @@
-
 import {
   createContext,
   useContext,
@@ -61,11 +60,28 @@ function ClerkAuthProvider({ children }) {
 
       const avatarUrl = clerkUser.imageUrl || '';
 
+      // The role selected during signup: check Clerk metadata first, fallback to sessionStorage
+      const storedRole =
+        typeof window !== 'undefined'
+          ? sessionStorage.getItem('edemy_requested_role')
+          : null;
+      const clerkRole = clerkUser.unsafeMetadata?.requestedRole;
+      const requestedRole =
+        clerkRole === 'educator' || storedRole === 'educator'
+          ? 'educator'
+          : 'student';
+
       try {
         const { data } = await api.patch('/users/me/profile', {
           name,
+          email,
           avatarUrl,
+          requestedRole,
         });
+
+        if (typeof window !== 'undefined') {
+          sessionStorage.removeItem('edemy_requested_role');
+        }
 
         const backendUser = data?.user || data;
 
@@ -84,6 +100,7 @@ function ClerkAuthProvider({ children }) {
             email: backendUser.email || email,
             avatarUrl: backendUser.avatarUrl || avatarUrl,
             role: backendUser.role,
+            roleAssigned: backendUser.roleAssigned,
             profileSyncError: null,
           });
         }
@@ -151,9 +168,7 @@ export function useSession() {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error(
-      'useSession must be used within AuthProvider',
-    );
+    throw new Error('useSession must be used within AuthProvider');
   }
 
   return context;

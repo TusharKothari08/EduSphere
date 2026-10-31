@@ -164,9 +164,31 @@ router.post('/:id/checkout', requireAuth, async (req, res, next) => {
     } catch (error) {
       return res.status(400).json({ message: error.message });
     }
-    // CLIENT_URL may contain multiple comma-separated origins for CORS. Stripe
-    // needs exactly one absolute return URL, without a trailing slash.
-    const clientUrl = String(process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0].trim().replace(/\/+$/, '');
+    // Determine the frontend return URL dynamically based on the initiating request's origin (if allowed),
+    // or fall back to the first non-backend allowed client origin.
+    let reqOrigin = '';
+    if (req.headers.origin) {
+      reqOrigin = req.headers.origin;
+    } else if (req.headers.referer) {
+      try {
+        reqOrigin = new URL(req.headers.referer).origin;
+      } catch {
+        reqOrigin = '';
+      }
+    }
+    reqOrigin = reqOrigin.replace(/\/+$/, '');
+
+    const knownAllowed = [
+      process.env.CLIENT_URL,
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'https://edu-sphere-rho-seven.vercel.app'
+    ].filter(Boolean).flatMap((item) => item.split(',')).map((url) => url.trim().replace(/\/+$/, ''));
+
+    const isLocalhost = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(reqOrigin);
+    const clientUrl = (reqOrigin && (knownAllowed.includes(reqOrigin) || isLocalhost))
+      ? reqOrigin
+      : (knownAllowed.find((url) => !url.includes('onrender.com')) || 'http://localhost:5173');
     const userId = String(req.user._id);
     const courseId = String(course._id);
     const session = await stripe.checkout.sessions.create({
